@@ -22,7 +22,7 @@ namespace ImageSink
                 //socket to receive messages on
                 using (var receiver = ctx.CreatePullSocket())
                 {
-                    receiver.Bind("tcp://localhost:5558");
+                    receiver.Bind("tcp://10.151.12.8:5558");
 
                     //wait for start of batch (see Ventilator.csproj Program.cs)
                     var startOfBatchTrigger = receiver.ReceiveString();
