@@ -33,10 +33,10 @@ namespace ImageVentilator
 
                         //the first message it "0" and signals start of batch
                         //see the Sink.csproj Program.cs file for where this is used
-                        Console.WriteLine("Sending start of batch to Sink");
-                        sink.Send("0");
+                        //Console.WriteLine("Sending start of batch to Sink");
+                        //sink.Send("0");
 
-                        Console.WriteLine("Sending tasks to workers");
+                        //Console.WriteLine("Sending tasks to workers");
 
                         ////initialise random number generator
                         //Random rand = new Random(0);
@@ -56,12 +56,69 @@ namespace ImageVentilator
                         //}
                         //Console.WriteLine("Total expected cost : {0} msec", totalMs);
 
-                        byte[] image = ReadImage();
+                        int count = 0;
+                        string name;
+                        byte[] nameb;
+                        int len;
+                        byte[] image;
+                        byte[] num;
+                        byte[] sendM;
+
+                        string[] filePaths = Directory.GetFiles("C:\\cygwin64\\home\\user\\coba\\SISTER\\", "*.jpg");
+                        count += filePaths.Length;
+                        
+                        filePaths = Directory.GetFiles("C:\\cygwin64\\home\\user\\coba\\SISTER\\", "*.png");
+                        count += filePaths.Length;
+
+                        Console.WriteLine(count);
+
+                        Console.WriteLine("Sending start of batch to Sink");
+                        sink.Send(BitConverter.GetBytes(count));
+
+                        Console.WriteLine("Sending tasks to workers");
+
+                        int i = 0;
+                        for (i = 0; i < filePaths.Length; i++)
+                        {
+                            name = filePaths[i].Replace("C:\\cygwin64\\home\\user\\coba\\SISTER\\","");
+                            nameb = GetBytes(name);
+                            len = nameb.Length;
+                            num = BitConverter.GetBytes(len);
+
+                            image = ReadImage(filePaths[i]);
+
+                            sendM = new byte[image.Length + len + 4];
+
+                            System.Buffer.BlockCopy(image, 0, sendM, 0, image.Length);
+                            System.Buffer.BlockCopy(nameb, 0, sendM, image.Length, len);
+                            System.Buffer.BlockCopy(num, 0, sendM, image.Length + len, 4);
+                            
+                            sender.Send(sendM);
+                        }
+
+                        filePaths = Directory.GetFiles("C:\\cygwin64\\home\\user\\coba\\SISTER\\", "*.jpg");
+
+                        for (i = 0; i < filePaths.Length; i++)
+                        {
+                            name = filePaths[i].Replace("C:\\cygwin64\\home\\user\\coba\\SISTER\\", "");
+                            nameb = GetBytes(name);
+                            len = nameb.Length;
+                            num = BitConverter.GetBytes(len);
+
+                            image = ReadImage(filePaths[i]);
+
+                            sendM = new byte[image.Length + len + 4];
+
+                            System.Buffer.BlockCopy(image, 0, sendM, 0, image.Length);
+                            System.Buffer.BlockCopy(nameb, 0, sendM, image.Length, len);
+                            System.Buffer.BlockCopy(num, 0, sendM, image.Length + len, 4);
+
+                            sender.Send(sendM);
+                        }
 
                         //Image output = byteArrayToImage(image);
                         //SaveFile(output);
 
-                        sender.Send(image);
 
                         Console.WriteLine("Press Enter to quit");
                         Console.ReadLine();
@@ -70,10 +127,11 @@ namespace ImageVentilator
             }
         }
 
-        static byte[] ReadImage()
+        static byte[] ReadImage(string file)
         {
             // Load file meta data with FileInfo
-            FileInfo fileInfo = new FileInfo("1.jpg");
+
+            FileInfo fileInfo = new FileInfo(file);
 
             // The byte[] to save the data in
             byte[] data = new byte[fileInfo.Length];
@@ -104,5 +162,12 @@ namespace ImageVentilator
         //    Bitmap bmp = new Bitmap(input);
         //    bmp.Save("BW.jpg", ImageFormat.Jpeg);
         //}
+
+        static byte[] GetBytes(string str)
+        {
+            byte[] bytes = new byte[str.Length * sizeof(char)];
+            System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
+            return bytes;
+        }
     }
 }

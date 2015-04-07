@@ -49,10 +49,36 @@ namespace ImageWorker
                             ////a message means worker is done.
                             ////See Sink.csproj Proram.cs
 
-                            byte[] output = ToBW(receiver.Receive());
+                            //sender.Send(receiver.Receive());
+                            byte[] input = receiver.Receive();
+                            int i = input.Length;
+                            //Console.WriteLine(i);
+
+                            byte[] num = new byte[4];
+                            System.Buffer.BlockCopy(input, i - 4, num, 0, 4);
+
+                            int len = BitConverter.ToInt32(num, 0);
+
+                            Console.WriteLine(len);
+
+                            byte[] nameb = new byte[len];
+                            System.Buffer.BlockCopy(input, i - len - 4, nameb, 0, len);
+
+                            byte[] sendI = new byte[i - len - 4];
+                            System.Buffer.BlockCopy(input, 0, sendI, 0, i - len - 4);
+
+                            //Console.WriteLine(sendI.Length);
+
+                            byte[] output = ToBW(sendI);
+
+                            byte[] sendM = new byte[output.Length + len + 4];
+                            System.Buffer.BlockCopy(output, 0, sendM, 0, output.Length);
+                            System.Buffer.BlockCopy(nameb, 0, sendM, output.Length, len);
+                            System.Buffer.BlockCopy(num, 0, sendM, output.Length + len, 4);
+
+                            sender.Send(sendM);
 
                             Console.WriteLine("Sending to Sink");
-                            sender.Send(output);
 
                             //Image bw = byteArrayToImage(output);
 
@@ -105,5 +131,6 @@ namespace ImageWorker
         //    Bitmap bmp = new Bitmap(input);
         //    bmp.Save("BW.jpg", ImageFormat.Jpeg);
         //}
+
     }
 }
