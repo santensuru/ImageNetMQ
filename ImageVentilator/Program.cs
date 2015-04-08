@@ -26,7 +26,7 @@ namespace ImageVentilator
 
                     using (var sink = ctx.CreatePushSocket())
                     {
-                        sink.Connect("tcp://localhost:5558");
+                        sink.Connect("tcp://10.151.12.9:5558");
 
                         Console.WriteLine("Press enter when worker are ready");
                         Console.ReadLine();

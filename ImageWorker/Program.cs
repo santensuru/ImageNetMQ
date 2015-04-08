@@ -25,12 +25,12 @@ namespace ImageWorker
                 //socket to receive messages on
                 using (var receiver = ctx.CreatePullSocket())
                 {
-                    receiver.Connect("tcp://localhost:5557");
+                    receiver.Connect("tcp://10.151.12.9:5557");
 
                     //socket to send messages on
                     using (var sender = ctx.CreatePushSocket())
                     {
-                        sender.Connect("tcp://localhost:5558");
+                        sender.Connect("tcp://10.151.12.9:5558");
 
                         //process tasks forever
                         while (true)
